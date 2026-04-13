@@ -1,0 +1,17 @@
+[project]
+name = "cloudflare-preferred-ip-hub"
+version = "0.1.0"
+description = "Maintain a cfnew-compatible preferred IP list from local CloudflareSpeedTest runs."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+preferred-ip = "cloudflare_preferred_ip_hub.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true

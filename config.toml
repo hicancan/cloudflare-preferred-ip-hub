@@ -1,0 +1,20 @@
+[cfst]
+path = "D:\\Dev\\cfst_windows_amd64\\cfst.exe"
+input_file = "D:\\Dev\\cfst_windows_amd64\\ip.txt"
+test_url = "https://jhb.ovh"
+
+[scan]
+regions = ["HKG"]
+delay_limit_ms = 500
+disable_download = true
+download_speed_min_mbps = 2.0
+download_count = 20
+download_duration_seconds = 3
+console_rows = 20
+top_per_region = 10
+default_port = 443
+
+[output]
+csv_dir = "artifacts"
+preferred_ip_file = "cloudflare_ips.txt"
+name_template = "{region}-{latency_ms}ms"
