@@ -1,3 +1,10 @@
+www.visa.com.sg:8443#www.visa.com.sg
+usa.visa.com:443#usa.visa.com
+myanmar.visa.com:8443#myanmar.visa.com
+www.visa.com.tw:2053#www.visa.com.tw
+www.visaeurope.ch:2083#www.visaeurope.ch
+www.visa.com.br:2087#www.visa.com.br
+www.visasoutheasteurope.com:2096#www.visasoutheasteurope.com
 104.17.148.150:443#HKG-42.63ms
 104.17.97.141:443#HKG-42.79ms
 104.16.152.221:443#HKG-42.82ms

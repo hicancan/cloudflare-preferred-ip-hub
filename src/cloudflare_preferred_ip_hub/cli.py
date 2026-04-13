@@ -42,16 +42,24 @@ class AppConfig:
     cfst: CfstConfig
     scan: ScanConfig
     output: OutputConfig
+    manual_preferred: list["ManualPreferredTarget"]
 
 
 @dataclass(frozen=True)
-class PreferredIP:
-    ip: str
+class ManualPreferredTarget:
+    address: str
+    port: int
+    name: str | None
+
+
+@dataclass(frozen=True)
+class PreferredEndpoint:
+    address: str
     port: int
     name: str
-    region: str
-    latency_ms: float
-    speed_mbps: float
+    region: str | None = None
+    latency_ms: float | None = None
+    speed_mbps: float | None = None
 
 
 def parse_args() -> argparse.Namespace:
@@ -112,6 +120,14 @@ def load_config(config_path: Path) -> AppConfig:
             preferred_ip_file=resolve_path(base, output_data["preferred_ip_file"]),
             name_template=output_data["name_template"],
         ),
+        manual_preferred=[
+            ManualPreferredTarget(
+                address=str(item["address"]).strip(),
+                port=int(item["port"]),
+                name=(str(item.get("name", "")).strip() or None),
+            )
+            for item in data.get("manual_preferred", [])
+        ],
     )
 
 
@@ -174,11 +190,13 @@ def parse_float(value: str | None) -> float:
         return 0.0
 
 
-def load_preferred_ips(config: AppConfig, csv_path: Path, region: str) -> list[PreferredIP]:
+def load_scanned_preferred_endpoints(
+    config: AppConfig, csv_path: Path, region: str
+) -> list[PreferredEndpoint]:
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
 
-    preferred: list[PreferredIP] = []
+    preferred: list[PreferredEndpoint] = []
     with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         for index, row in enumerate(reader, start=1):
@@ -196,8 +214,8 @@ def load_preferred_ips(config: AppConfig, csv_path: Path, region: str) -> list[P
                 index=index,
             )
             preferred.append(
-                PreferredIP(
-                    ip=ip,
+                PreferredEndpoint(
+                    address=ip,
                     port=config.scan.default_port,
                     name=name,
                     region=region_code,
@@ -212,14 +230,27 @@ def load_preferred_ips(config: AppConfig, csv_path: Path, region: str) -> list[P
     return preferred
 
 
-def write_preferred_ip_file(config: AppConfig, preferred_ips: list[PreferredIP]) -> None:
-    lines = [f"{item.ip}:{item.port}#{item.name}" for item in preferred_ips]
+def load_manual_preferred_endpoints(config: AppConfig) -> list[PreferredEndpoint]:
+    return [
+        PreferredEndpoint(
+            address=item.address,
+            port=item.port,
+            name=item.name or item.address,
+        )
+        for item in config.manual_preferred
+    ]
+
+
+def write_preferred_ip_file(config: AppConfig, preferred_ips: list[PreferredEndpoint]) -> None:
+    lines = [f"{item.address}:{item.port}#{item.name}" for item in preferred_ips]
     text = "\n".join(lines).rstrip() + "\n"
     config.output.preferred_ip_file.write_text(text, encoding="utf-8")
 
 
-def generate(config: AppConfig, regions: list[str], skip_scan: bool) -> list[PreferredIP]:
-    all_preferred: list[PreferredIP] = []
+def generate(config: AppConfig, regions: list[str], skip_scan: bool) -> list[PreferredEndpoint]:
+    all_preferred = load_manual_preferred_endpoints(config)
+    if all_preferred:
+        print(f"[manual] loaded {len(all_preferred)} configured preferred entries")
 
     for region in regions:
         csv_path = expected_csv_path(config, region)
@@ -228,7 +259,7 @@ def generate(config: AppConfig, regions: list[str], skip_scan: bool) -> list[Pre
         else:
             csv_path = run_scan(config, region)
 
-        preferred = load_preferred_ips(config, csv_path, region)
+        preferred = load_scanned_preferred_endpoints(config, csv_path, region)
         print(f"[select] {region}: kept {len(preferred)} IPs from {csv_path.name}")
         all_preferred.extend(preferred)
 

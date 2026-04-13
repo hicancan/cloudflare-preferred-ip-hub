@@ -5,6 +5,7 @@ This project keeps a local `cfnew`-compatible preferred IP list under version co
 ## What It Does
 
 - Runs local `cfst.exe` scans with your saved config
+- Supports manual preferred entries for Cloudflare domains or IPs with custom ports
 - Writes region CSV files into `artifacts/`
 - Generates `cloudflare_ips.txt` in the format expected by `cfnew`
 - Lets you commit and push the generated file so `cfnew` can read it from a GitHub Raw URL
@@ -28,7 +29,18 @@ That keeps preferred IP generation local, while distribution stays simple and st
 
 ## Configuration
 
-Edit `config.toml` if your `cfst.exe` path, `ip.txt` path, or region list changes.
+Edit `config.toml` if your `cfst.exe` path, `ip.txt` path, region list, or manual preferred entries change.
+
+Manual entries use `[[manual_preferred]]` blocks:
+
+```toml
+[[manual_preferred]]
+address = "www.visa.com.sg"
+port = 8443
+name = "SG Visa"
+```
+
+`name` is optional. If omitted, the address is used as the display name.
 
 ## Usage
 
@@ -48,6 +60,7 @@ uv run preferred-ip --skip-scan
 ## Output Files
 
 - `cloudflare_ips.txt`: the file you commit and expose via GitHub Raw
+- `config.toml`: local scan settings plus any manual preferred domains or IPs
 - `artifacts/result_<region>_delay.csv`: local scan result files
 
 ## cfnew Example

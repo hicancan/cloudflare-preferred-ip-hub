@@ -18,3 +18,31 @@ default_port = 443
 csv_dir = "artifacts"
 preferred_ip_file = "cloudflare_ips.txt"
 name_template = "{region}-{latency_ms}ms"
+
+[[manual_preferred]]
+address = "www.visa.com.sg"
+port = 8443
+
+[[manual_preferred]]
+address = "usa.visa.com"
+port = 443
+
+[[manual_preferred]]
+address = "myanmar.visa.com"
+port = 8443
+
+[[manual_preferred]]
+address = "www.visa.com.tw"
+port = 2053
+
+[[manual_preferred]]
+address = "www.visaeurope.ch"
+port = 2083
+
+[[manual_preferred]]
+address = "www.visa.com.br"
+port = 2087
+
+[[manual_preferred]]
+address = "www.visasoutheasteurope.com"
+port = 2096
